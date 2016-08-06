@@ -1,0 +1,46 @@
+{
+  "name": "autoreload-gulp",
+  "version": "0.0.0",
+  "description": "Reloads gulp process when gulpfile.js or an imported relative dependency change",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jlenoble/autoreload-gulp.git"
+  },
+  "keywords": [
+    "gulp"
+  ],
+  "author": {
+    "name": "Jason Lenoble",
+    "email": "jason.lenoble@gmail.com"
+  },
+  "contributors": [],
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.3.0"
+  },
+  "bugs": {
+    "url": "https://github.com/jlenoble/autoreload-gulp/issues"
+  },
+  "homepage": "https://github.com/jlenoble/autoreload-gulp#readme",
+  "devDependencies": {
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.9.0",
+    "chai": "^3.5.0",
+    "del": "^2.2.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-jscs": "^4.0.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-sourcemaps": "^1.6.0",
+    "muter": "^0.2.3"
+  },
+  "dependencies": {
+    "gulp": "git://github.com/gulpjs/gulp.git#4.0"
+  }
+}
