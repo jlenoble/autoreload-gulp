@@ -1,64 +1,89 @@
 import gulp from 'gulp';
 import replace from 'gulp-replace';
 import {spawn, exec} from 'child_process';
-import Muter from 'muter';
+import childProcessData from 'child-process-data';
 
 describe('Testing autoreload-gulp', function() {
 
-  it('Autoreloading gulpfile.js', function() {
-    var proc = spawn('gulp', [
-      '--gulpfile',
-      'build/gulpfile.js'
-    ]);
+  function factory(gulpfilePath) {
+    return function() {
+      this.timeout(10000);
 
-    var counter = 0;
-    const muter = Muter(console, 'log');
-    muter.mute();
+      const proc = childProcessData(spawn('gulp', [
+        '--gulpfile',
+        gulpfilePath
+      ], {detached: true})); // Make sure all test processes will be killed
 
-    proc.stdout.on('data', function(data) {
-      data = data.toString('utf8');
-      console.log(data);
+      return new Promise((resolve, reject) => {
+        var counter = 0;
+        var lastSize = 0;
 
-      if (data.includes(`Finished 'watch' after`)) {
-        counter++;
+        proc.then(res => {
+          function processRes() {
+            proc.then(res => {
+              const message = res.allMessages[res.allMessages.length - 1];
 
-        if (counter < 6) {
-          gulp.src('build/gulpfile.js')
-            .pipe(replace('Salut!', 'Ave!'))
-            .pipe(replace('Ciao!', 'Salut!'))
-            .pipe(replace('Hallo!', 'Ciao!'))
-            .pipe(replace('Hola!', 'Hallo!'))
-            .pipe(replace('Hello!', 'Hola!'))
-            .pipe(gulp.dest('build'));
-        } else {
-          proc.kill();
+              if (message.match(/Finished 'watch'/) &&
+                lastSize !== res.allMessages.length) {
+                counter++;
+                lastSize = res.allMessages.length;
 
-          const logs = muter.getLogs();
-          muter.unmute();
-          console.log(logs);
+                if (counter < 6) {
+                  gulp.src(gulpfilePath)
+                    .pipe(replace('Salut!', 'Ave!'))
+                    .pipe(replace('Ciao!', 'Salut!'))
+                    .pipe(replace('Hallo!', 'Ciao!'))
+                    .pipe(replace('Hola!', 'Hallo!'))
+                    .pipe(replace('Hello!', 'Hola!'))
+                    .pipe(gulp.dest('build'));
+                } else {
+                  clearAll();
+                  resolve();
+                }
+              }
+            });
+          }
 
-          gulp.src('build/gulpfile.js')
-            .pipe(replace('Ave!', 'Hello!'))
-            .pipe(replace('Salut!', 'Hello!'))
-            .pipe(replace('Ciao!', 'Hello!'))
-            .pipe(replace('Hallo!', 'Hello!'))
-            .pipe(replace('Hola!', 'Hello!'))
-            .pipe(gulp.dest('build'));
-        }
-      }
-    });
+          function clearAll() {
+            if (intervalID === null) {
+              return;
+            }
 
-    proc.stderr.on('data', function(data) {
-      data = data.toString('utf8');
-      console.log('stderr:', data);
-    });
+            clearInterval(intervalID);
+            intervalID = null;
 
-    proc.on('close', function(code) {
-      console.log('closing code: ' + code);
-    });
-  });
+            process.kill(-res.childProcess.pid); // Kill last test process,
+            // which was not killed by autoreload
 
-  it('Autoreloading gulpfile.babel.js');
+            gulp.src(gulpfilePath)
+              .pipe(replace('Ave!', 'Hello!'))
+              .pipe(replace('Salut!', 'Hello!'))
+              .pipe(replace('Ciao!', 'Hello!'))
+              .pipe(replace('Hallo!', 'Hello!'))
+              .pipe(replace('Hola!', 'Hello!'))
+              .pipe(gulp.dest('build'));
+          }
+
+          var intervalID = setInterval(processRes, 200);
+
+          function timeout() {
+            clearAll();
+            reject(new Error('Waiting too long for child process to finish'));
+          }
+
+          setTimeout(timeout, 8000);
+        });
+
+        proc.catch(err => {
+          reject(err);
+        });
+      });
+    };
+  }
+
+  it('Autoreloading gulpfile.js', factory('build/gulpfile.js'));
+
+  it('Autoreloading gulpfile.babel.js', factory('build/gulpfile.babel.js'));
 
   it('Autoreloading gulpfile.js and dependencies');
 

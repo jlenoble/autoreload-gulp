@@ -1,14 +1,14 @@
-var gulp = require('gulp');
-var autoreload = require('./src/autoreload-gulp');
+import gulp from 'gulp';
+import autoreload from './src/autoreload-gulp';
 
-var hello = function(done) {
+const hello = done => {
   console.log('Hello!');
   done();
 };
 
 gulp.task('hello', hello);
 
-gulp.task('watch', gulp.series('hello', function(done) {
+gulp.task('watch', gulp.series('hello', done => {
   gulp.watch('src/autoreload-gulp', hello);
   done();
 }));
