@@ -33,7 +33,7 @@ describe('Testing autoreload-gulp', function() {
 
       return new Promise((resolve, reject) => {
         var counter = 0;
-        var lastSize = 0;
+        var lastPos;
 
         proc.then(res => {
           function processRes() {
@@ -42,9 +42,9 @@ describe('Testing autoreload-gulp', function() {
               const message = res.allMessages[pos];
 
               if (message.match(/Finished 'watch'/) &&
-                lastSize !== res.allMessages.length) {
+                lastPos !== pos) {
                 counter++;
-                lastSize = res.allMessages.length;
+                lastPos = pos;
 
                 try {
                   let array = res.outMessages.slice(pos - 10, pos);
