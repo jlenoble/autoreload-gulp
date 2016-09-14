@@ -33,6 +33,7 @@
     "chai": "^3.5.0",
     "child-process-data": "^0.1.0",
     "del": "^2.2.1",
+    "fs-extra": "^0.30.0",
     "gulp-babel": "^6.1.2",
     "gulp-jscs": "^4.0.0",
     "gulp-mocha": "^2.2.0",

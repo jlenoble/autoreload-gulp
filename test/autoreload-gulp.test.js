@@ -2,12 +2,29 @@ import gulp from 'gulp';
 import replace from 'gulp-replace';
 import {spawn, exec} from 'child_process';
 import childProcessData from 'child-process-data';
+import {expect} from 'chai';
+import path from 'path';
+import del from 'del';
+import fse from 'fs-extra';
 
 describe('Testing autoreload-gulp', function() {
 
+  const hellos = ['Hello!', 'Hola!', 'Hallo!', 'Ciao!', 'Salut!', 'Ave!'];
+
   function factory(gulpfilePath) {
     return function() {
-      this.timeout(10000);
+      this.timeout(20000);
+
+      const file = path.basename(gulpfilePath);
+      const srcFile = path.join('./test/gulpfiles', file);
+
+      try {
+        fse.copySync(srcFile, gulpfilePath);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+
+      process.env.BABEL_DISABLE_CACHE = 1; // Don't use Babel caching for these tests
 
       const proc = childProcessData(spawn('gulp', [
         '--gulpfile',
@@ -21,20 +38,32 @@ describe('Testing autoreload-gulp', function() {
         proc.then(res => {
           function processRes() {
             proc.then(res => {
-              const message = res.allMessages[res.allMessages.length - 1];
+              const pos = res.allMessages.length - 1;
+              const message = res.allMessages[pos];
 
               if (message.match(/Finished 'watch'/) &&
                 lastSize !== res.allMessages.length) {
                 counter++;
                 lastSize = res.allMessages.length;
 
+                try {
+                  let array = res.outMessages.slice(pos - 10, pos);
+                  expect(array).to.include(// Chunks are sometimes unexpected
+                    // so go through several chunks instead of only one
+                    hellos[counter - 1] + '\n');
+                } catch (err) {
+                  clearAll();
+                  reject(err);
+                  return;
+                }
+
                 if (counter < 6) {
                   gulp.src(gulpfilePath)
-                    .pipe(replace('Salut!', 'Ave!'))
-                    .pipe(replace('Ciao!', 'Salut!'))
-                    .pipe(replace('Hallo!', 'Ciao!'))
-                    .pipe(replace('Hola!', 'Hallo!'))
-                    .pipe(replace('Hello!', 'Hola!'))
+                    .pipe(replace(hellos[4], hellos[5]))
+                    .pipe(replace(hellos[3], hellos[4]))
+                    .pipe(replace(hellos[2], hellos[3]))
+                    .pipe(replace(hellos[1], hellos[2]))
+                    .pipe(replace(hellos[0], hellos[1]))
                     .pipe(gulp.dest('build'));
                 } else {
                   clearAll();
@@ -55,13 +84,7 @@ describe('Testing autoreload-gulp', function() {
             process.kill(-res.childProcess.pid); // Kill last test process,
             // which was not killed by autoreload
 
-            gulp.src(gulpfilePath)
-              .pipe(replace('Ave!', 'Hello!'))
-              .pipe(replace('Salut!', 'Hello!'))
-              .pipe(replace('Ciao!', 'Hello!'))
-              .pipe(replace('Hallo!', 'Hello!'))
-              .pipe(replace('Hola!', 'Hello!'))
-              .pipe(gulp.dest('build'));
+            del(gulpfilePath);
           }
 
           var intervalID = setInterval(processRes, 200);
@@ -71,12 +94,10 @@ describe('Testing autoreload-gulp', function() {
             reject(new Error('Waiting too long for child process to finish'));
           }
 
-          setTimeout(timeout, 8000);
+          setTimeout(timeout, 18000);
         });
 
-        proc.catch(err => {
-          reject(err);
-        });
+        proc.catch(reject);
       });
     };
   }
