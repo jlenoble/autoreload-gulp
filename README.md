@@ -5,7 +5,7 @@ Reloads gulp process when gulpfile.js or an imported relative dependency change
 
 When developping, you sometimes edit your gulpfile to add new tasks or refine/refactor existing ones. At that point, you have to abort your TDD/BDD processes and restart them. This module makes restarting them easy by watching your gulpfiles and their dependencies. Whenever one of them is modified, it aborts the process and relaunches a new one.
 
-## Simple usage
+## Usage
 
 To use the module, just wrap your target tasks with the function autoreload, which is the default import of the module.
 
@@ -108,6 +108,20 @@ Starting 'spawnChild'...
 [12:36:47] Starting 'watch'...
 gulpfile1
 [12:36:47] Finished 'watch' after 12 ms
+```
+
+## Importing tasks or helper functions
+
+If there is in the same directory as your gulpfile, a directory called ```gulp```, ```gulp-tasks``` or ```gulp_tasks```, the files it contains will be watched too and the process reloaded if one of them is modified. autoreload expects only one of these names to be in use. It will possibly watch the wrong files if you use the names concurrently.
+
+In the following example, the process will be reloaded if ```./gulp/tasks.js``` is edited.
+
+```js
+import gulp from 'gulp';
+import autoreload from './src/autoreload-gulp';
+import tasks from './gulp/tasks';
+
+gulp.task('default', autoreload('watch'));
 ```
 
 ## License

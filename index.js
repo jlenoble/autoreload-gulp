@@ -8,28 +8,67 @@ var _gulp = require('gulp');
 
 var _gulp2 = _interopRequireDefault(_gulp);
 
-var _yargs = require('yargs');
-
-var _yargs2 = _interopRequireDefault(_yargs);
-
 var _child_process = require('child_process');
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var autoreload = function autoreload(task) {
-  return function (done) {
+  return function () {
     var p;
-    _gulp2.default.watch('gulpfile(.babel|).js', spawnChild);
-    spawnChild(done);
+
+    function checkGulpDir(dir) {
+      return new Promise(function (resolve, reject) {
+        _fs2.default.stat(dir, function (err, stats) {
+          if (err) {
+            return reject(err);
+          }
+          if (!stats.isDirectory()) {
+            return reject(new Error(dir + ' is not a directory!'));
+          } else {
+            resolve(dir);
+          }
+        });
+      });
+    }
 
     function spawnChild(done) {
       if (p) {
         p.kill();
       }
-
       p = (0, _child_process.spawn)('gulp', [task], { stdio: 'inherit' });
-      done();
+      if (done) {
+        done();
+      }
     }
+
+    function swapResolution(promise) {
+      // (A\/B)° = A°/\B°
+      return new Promise(function (resolve, reject) {
+        return Promise.resolve(promise).then(reject, resolve);
+      });
+    }
+
+    function any(promises) {
+      return swapResolution(Promise.all(promises.map(swapResolution)));
+    };
+
+    var promise = any(['gulp', 'gulp-tasks', 'gulp_tasks'].map(checkGulpDir));
+
+    return promise.then(function (dir) {
+      _gulp2.default.watch(['gulpfile(.babel|).js', _path2.default.join(dir, '**/*.js')], spawnChild);
+      spawnChild();
+    }, function (err) {
+      _gulp2.default.watch('gulpfile(.babel|).js', spawnChild);
+      spawnChild();
+    });
   };
 };
 

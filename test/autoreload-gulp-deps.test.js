@@ -7,19 +7,36 @@ import path from 'path';
 import del from 'del';
 import fse from 'fs-extra';
 
-describe('Testing autoreload-gulp', function() {
+describe('Testing autoreload-gulp with dependencies', function() {
 
   const hellos = ['Hello!', 'Hola!', 'Hallo!', 'Ciao!', 'Salut!', 'Ave!'];
 
-  function factory(gulpfilePath) {
+  function factory(stem, dir) {
     return function() {
       this.timeout(20000);
 
-      const file = path.basename(gulpfilePath);
-      const srcFile = path.join('./test/gulpfiles', file);
+      const gulpfilePath = path.join('build', stem + '.js');
+      const tasksDir = path.join('build', dir);
+      const tasksPath = path.join(tasksDir,
+        /\.babel/.test(stem) ? 'tasks.babel.js' : 'tasks.js');
+
+      switch (dir) {
+        case 'gulp-tasks':
+          stem += 2; break;
+        case 'gulp_tasks':
+          stem += 3; break;
+      }
 
       try {
-        fse.copySync(srcFile, gulpfilePath);
+        (function sleep(ms) {
+          var start = new Date().getTime();
+          var expire = start + ms;
+          while (new Date().getTime() < expire) {}
+        })(1000); // Space out somewhat tests to avoid writing conflicts on disc
+
+        fse.copySync(path.join('test/gulpfiles', stem + '-deps.js'),
+          gulpfilePath);
+        fse.copySync('test/gulpfiles/gulp', tasksDir);
       } catch (err) {
         return Promise.reject(err);
       }
@@ -52,28 +69,26 @@ describe('Testing autoreload-gulp', function() {
                     // so go through several chunks instead of only one
                     hellos[counter - 1] + '\n');
                 } catch (err) {
-                  clearAll();
-                  reject(err);
+                  clearAll(reject, err);
                   return;
                 }
 
                 if (counter < 6) {
-                  gulp.src(gulpfilePath)
+                  gulp.src(tasksPath)
                     .pipe(replace(hellos[4], hellos[5]))
                     .pipe(replace(hellos[3], hellos[4]))
                     .pipe(replace(hellos[2], hellos[3]))
                     .pipe(replace(hellos[1], hellos[2]))
                     .pipe(replace(hellos[0], hellos[1]))
-                    .pipe(gulp.dest('build'));
+                    .pipe(gulp.dest(tasksDir));
                 } else {
-                  clearAll();
-                  resolve();
+                  clearAll(resolve);
                 }
               }
             });
           }
 
-          function clearAll() {
+          function clearAll(callback, val) {
             if (intervalID === null) {
               return;
             }
@@ -84,14 +99,15 @@ describe('Testing autoreload-gulp', function() {
             process.kill(-res.childProcess.pid); // Kill last test process,
             // which was not killed by autoreload
 
-            del(gulpfilePath);
+            Promise.all([del(gulpfilePath), del(tasksDir)])
+            .then(() => {callback(val);});
           }
 
           var intervalID = setInterval(processRes, 200);
 
           function timeout() {
-            clearAll();
-            reject(new Error('Waiting too long for child process to finish'));
+            clearAll(reject,
+              new Error('Waiting too long for child process to finish'));
           }
 
           setTimeout(timeout, 18000);
@@ -102,8 +118,11 @@ describe('Testing autoreload-gulp', function() {
     };
   }
 
-  it('Autoreloading gulpfile.js', factory('build/gulpfile.js'));
-
-  it('Autoreloading gulpfile.babel.js', factory('build/gulpfile.babel.js'));
+  ['gulp', 'gulp-tasks', 'gulp_tasks'].forEach(dir => {
+    it(`Autoreloading gulpfile.js with deps in ${dir}`,
+      factory('gulpfile', dir));
+    it(`Autoreloading gulpfile.babel.js with deps in ${dir}`,
+      factory('gulpfile.babel', dir));
+  });
 
 });
