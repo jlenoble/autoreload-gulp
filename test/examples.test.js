@@ -39,9 +39,13 @@ describe('Testing autoreload-gulp', function() {
                 lastPos = pos;
 
                 let messages = res.allMessages.slice(pos - 5);
-                let match = messages[5].match(/Finished 'watch'/) ||
-                  (messages[3].match(/'watch' errored after/) &&
-                  messages[5].match(/Error: Test error\n/));
+
+                let match = messages[5].match(/Finished 'watch'/);
+
+                if (!match) {
+                  match = messages[5].match(/Error: Test error\n/);
+                    messages.join().match(/'watch' errored after/);
+                }
 
                 if (match) {
                   counter++;
