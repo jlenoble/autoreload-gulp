@@ -2,6 +2,24 @@ import gulp from 'gulp';
 import {spawn} from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import psTree from 'ps-tree';
+
+var deepKill = function(pid, signal, callback) {
+  signal   = signal || 'SIGKILL';
+  callback = callback || function() {};
+
+  psTree(pid, function(err, children) {
+    [pid].concat(
+      children.map(function(p) {
+        return p.PID;
+      })
+    ).forEach(function(tpid) {
+      try { process.kill(tpid, signal); }
+      catch (ex) {}
+    });
+    callback();
+  });
+};
 
 const autoreload = (task) => {
   return () => {
@@ -23,7 +41,7 @@ const autoreload = (task) => {
     }
 
     function spawnChild(done) {
-      if (p) { p.kill(); }
+      if (p) { deepKill(p.pid); }
       p = spawn('gulp', [task], {stdio: 'inherit'});
       if (done) {
         done();

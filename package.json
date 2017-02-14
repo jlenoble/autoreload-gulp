@@ -43,6 +43,7 @@
     "gulp-sourcemaps": "^1.6.0"
   },
   "dependencies": {
-    "gulp": "git://github.com/gulpjs/gulp.git#4.0"
+    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
+    "ps-tree": "^1.1.0"
   }
 }
