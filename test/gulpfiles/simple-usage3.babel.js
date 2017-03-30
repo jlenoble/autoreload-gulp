@@ -1,6 +1,5 @@
 import gulp from 'gulp';
 import autoreload from './src/autoreload-gulp';
-import babel from 'gulp-babel';
 
 gulp.task('watch', done => {
   console.log('gulpfile3');

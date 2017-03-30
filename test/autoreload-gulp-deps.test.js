@@ -7,13 +7,14 @@ import path from 'path';
 import del from 'del';
 import fse from 'fs-extra';
 
-describe('Testing autoreload-gulp with dependencies', function() {
-
+describe('Testing autoreload-gulp with dependencies', function () {
   const hellos = ['Hello!', 'Hola!', 'Hallo!', 'Ciao!', 'Salut!', 'Ave!'];
 
-  function factory(stem, dir) {
-    return function() {
-      this.timeout(20000);
+  function factory (_stem, dir) {
+    let stem = _stem;
+
+    return function () {
+      this.timeout(20000); // eslint-disable-line no-invalid-this
 
       const gulpfilePath = path.join('build', stem + '.js');
       const tasksDir = path.join('build', dir);
@@ -21,14 +22,14 @@ describe('Testing autoreload-gulp with dependencies', function() {
         /\.babel/.test(stem) ? 'tasks.babel.js' : 'tasks.js');
 
       switch (dir) {
-        case 'gulp-tasks':
-          stem += 2; break;
-        case 'gulp_tasks':
-          stem += 3; break;
+      case 'gulp-tasks':
+        stem += 2; break;
+      case 'gulp_tasks':
+        stem += 3; break;
       }
 
       try {
-        (function sleep(ms) {
+        (function (ms) {
           var start = new Date().getTime();
           var expire = start + ms;
           while (new Date().getTime() < expire) {}
@@ -41,11 +42,12 @@ describe('Testing autoreload-gulp with dependencies', function() {
         return Promise.reject(err);
       }
 
-      process.env.BABEL_DISABLE_CACHE = 1; // Don't use Babel caching for these tests
+      process.env.BABEL_DISABLE_CACHE = 1; // Don't use Babel caching for
+      // these tests
 
       const proc = childProcessData(spawn('gulp', [
         '--gulpfile',
-        gulpfilePath
+        gulpfilePath,
       ], {detached: true})); // Make sure all test processes will be killed
 
       return new Promise((resolve, reject) => {
@@ -53,7 +55,7 @@ describe('Testing autoreload-gulp with dependencies', function() {
         var lastPos;
 
         proc.then(res => {
-          function processRes() {
+          function processRes () {
             proc.then(res => {
               const pos = res.allMessages.length - 1;
               const message = res.allMessages[pos];
@@ -88,7 +90,7 @@ describe('Testing autoreload-gulp with dependencies', function() {
             });
           }
 
-          function clearAll(callback, val) {
+          function clearAll (callback, val) {
             if (intervalID === null) {
               return;
             }
@@ -100,12 +102,12 @@ describe('Testing autoreload-gulp with dependencies', function() {
             // which was not killed by autoreload
 
             Promise.all([del(gulpfilePath), del(tasksDir)])
-            .then(() => {callback(val);});
+            .then(() => callback(val));
           }
 
           var intervalID = setInterval(processRes, 200);
 
-          function timeout() {
+          function timeout () {
             clearAll(reject,
               new Error('Waiting too long for child process to finish'));
           }
@@ -124,5 +126,4 @@ describe('Testing autoreload-gulp with dependencies', function() {
     it(`Autoreloading gulpfile.babel.js with deps in ${dir}`,
       factory('gulpfile.babel', dir));
   });
-
 });

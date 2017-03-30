@@ -7,13 +7,12 @@ import path from 'path';
 import del from 'del';
 import fse from 'fs-extra';
 
-describe('Testing autoreload-gulp', function() {
-
+describe('Testing autoreload-gulp', function () {
   const hellos = ['Hello!', 'Hola!', 'Hallo!', 'Ciao!', 'Salut!', 'Ave!'];
 
-  function factory(gulpfilePath) {
-    return function() {
-      this.timeout(20000);
+  function factory (gulpfilePath) {
+    return function () {
+      this.timeout(20000); // eslint-disable-line no-invalid-this
 
       const file = path.basename(gulpfilePath);
       const srcFile = path.join('./test/gulpfiles', file);
@@ -24,11 +23,12 @@ describe('Testing autoreload-gulp', function() {
         return Promise.reject(err);
       }
 
-      process.env.BABEL_DISABLE_CACHE = 1; // Don't use Babel caching for these tests
+      process.env.BABEL_DISABLE_CACHE = 1; // Don't use Babel caching for
+      // these tests
 
       const proc = childProcessData(spawn('gulp', [
         '--gulpfile',
-        gulpfilePath
+        gulpfilePath,
       ], {detached: true})); // Make sure all test processes will be killed
 
       return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ describe('Testing autoreload-gulp', function() {
         var lastPos;
 
         proc.then(res => {
-          function processRes() {
+          function processRes () {
             proc.then(res => {
               const pos = res.allMessages.length - 1;
               const message = res.allMessages[pos];
@@ -73,7 +73,7 @@ describe('Testing autoreload-gulp', function() {
             });
           }
 
-          function clearAll() {
+          function clearAll () {
             if (intervalID === null) {
               return;
             }
@@ -89,7 +89,7 @@ describe('Testing autoreload-gulp', function() {
 
           var intervalID = setInterval(processRes, 200);
 
-          function timeout() {
+          function timeout () {
             clearAll();
             reject(new Error('Waiting too long for child process to finish'));
           }
@@ -105,5 +105,4 @@ describe('Testing autoreload-gulp', function() {
   it('Autoreloading gulpfile.js', factory('build/gulpfile.js'));
 
   it('Autoreloading gulpfile.babel.js', factory('build/gulpfile.babel.js'));
-
 });

@@ -4,30 +4,31 @@ import fs from 'fs';
 import path from 'path';
 import psTree from 'ps-tree';
 
-var deepKill = function(pid, signal, callback) {
-  signal   = signal || 'SIGKILL';
-  callback = callback || function() {};
+var deepKill = function (pid, _signal, _callback) {
+  const signal = _signal || 'SIGKILL';
+  const callback = _callback || function () {};
 
-  psTree(pid, function(err, children) {
+  psTree(pid, function (err, children) {
     [pid].concat(
-      children.map(function(p) {
+      children.map(function (p) {
         return p.PID;
       })
-    ).forEach(function(tpid) {
-      try { process.kill(tpid, signal); }
-      catch (ex) {}
+    ).forEach(function (tpid) {
+      try {
+        process.kill(tpid, signal);
+      } catch (ex) {}
     });
     callback();
   });
 };
 
-const autoreload = (task) => {
+const autoreload = task => {
   return () => {
     var p;
 
-    function checkGulpDir(dir) {
+    function checkGulpDir (dir) {
       return new Promise((resolve, reject) => {
-        fs.stat(dir, function(err, stats) {
+        fs.stat(dir, function (err, stats) {
           if (err) {
             return reject(err);
           }
@@ -40,20 +41,22 @@ const autoreload = (task) => {
       });
     }
 
-    function spawnChild(done) {
-      if (p) { deepKill(p.pid); }
+    function spawnChild (done) {
+      if (p) {
+        deepKill(p.pid);
+      }
       p = spawn('gulp', [task], {stdio: 'inherit'});
       if (done) {
         done();
       }
     }
 
-    function swapResolution(promise) { // (A\/B)° = A°/\B°
+    function swapResolution (promise) { // (A\/B)° = A°/\B°
       return new Promise((resolve, reject) =>
         Promise.resolve(promise).then(reject, resolve));
     }
 
-    function any(promises) {
+    function any (promises) {
       return swapResolution(Promise.all(promises.map(swapResolution)));
     };
 
