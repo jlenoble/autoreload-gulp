@@ -128,4 +128,4 @@ gulp.task('default', autoreload('watch'));
 
 autoreload-gulp is [MIT licensed](./LICENSE).
 
-© [Jason Lenoble](mailto:jason.lenoble@gmail.com)
+© 2016-2017 [Jason Lenoble](mailto:jason.lenoble@gmail.com)
