@@ -6,11 +6,11 @@
     "email": "jason.lenoble@gmail.com",
     "github": "jlenoble",
     "license": "MIT",
-    "transpile": "es2015",
+    "transpile": "es2017",
     "addons": [],
     "Class": "AutoreloadGulp",
     "updated": 2017,
-    "created": 2017,
-    "year": "2017"
+    "created": 2016,
+    "year": "2016-2017"
   }
 }
