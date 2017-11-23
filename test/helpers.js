@@ -72,7 +72,7 @@ export function testData (data, change) {
 
   if (!complete) {
     complete = data.errMessages.findIndex(
-    el => el.match(/'watch' errored after/)) !== -1;
+      el => el.match(/'watch' errored after/)) !== -1;
   }
 
   if (complete) {
@@ -97,7 +97,7 @@ export function itCallback (options) {
       let counter = changes.length - 1;
       let change = changes[changes.length - 1 - counter];
 
-      while(await repeat(() => testData(data, change)) && counter > 0) {
+      while (await repeat(() => testData(data, change)) && counter > 0) {
         counter--;
         change = changes[changes.length - 1 - counter];
         data.forget();

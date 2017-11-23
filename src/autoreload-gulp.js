@@ -22,7 +22,7 @@ var deepKill = function (pid, _signal, _callback) {
   });
 };
 
-const autoreload = task => {
+const autoreload = (task, gulpDir) => {
   return () => {
     var p;
 
@@ -60,7 +60,8 @@ const autoreload = task => {
       return swapResolution(Promise.all(promises.map(swapResolution)));
     };
 
-    const promise = any(['gulp', 'gulp-tasks', 'gulp_tasks'].map(checkGulpDir));
+    const promise = gulpDir ? Promise.resolve(gulpDir) :
+      any(['gulp', 'gulp-tasks', 'gulp_tasks'].map(checkGulpDir));
 
     return promise.then(dir => {
       gulp.watch(['gulpfile(.babel|).js', path.join(dir, '**/*.js')],
