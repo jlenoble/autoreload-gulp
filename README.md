@@ -118,10 +118,25 @@ In the following example, the process will be reloaded if ```./gulp/tasks.js``` 
 
 ```js
 import gulp from 'gulp';
-import autoreload from './src/autoreload-gulp';
-import tasks from './gulp/tasks';
+import autoreload from 'autoreload-gulp';
+import './gulp/tasks';
 
 gulp.task('default', autoreload('watch'));
+```
+
+## Custom include directory for gulp process
+
+If a 2nd argument is specified for function `autoreload`, it is considered to be the path to a custom directory where to find the local files included in the gulpfile, overriding the default ```gulp```, ```gulp-tasks``` or ```gulp_tasks```.
+
+```js
+import gulp from 'gulp';
+import autoreload from 'autoreload-gulp';
+
+import './build/gulp-tasks/task1';
+import './build/gulp-tasks/task2';
+import './build/gulp-tasks/task3';
+
+gulp.task('default', autoreload('watch', 'build/gulp-tasks'));
 ```
 
 ## License
