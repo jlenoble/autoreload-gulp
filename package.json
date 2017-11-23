@@ -1,6 +1,6 @@
 {
   "name": "autoreload-gulp",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Reloads gulp process when gulpfile.js or an imported relative dependency change",
   "main": "lib/autoreload-gulp.js",
   "scripts": {
