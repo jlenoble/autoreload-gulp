@@ -64,11 +64,11 @@ const autoreload = (task, gulpDir) => {
       any(['gulp', 'gulp-tasks', 'gulp_tasks'].map(checkGulpDir));
 
     return promise.then(dir => {
-      gulp.watch(['gulpfile(.babel|).js', path.join(dir, '**/*.js')],
-        spawnChild);
+      gulp.watch(['gulpfile.js', 'gulpfile.babel.js', path.join(dir,
+        '**/*.js')], spawnChild);
       spawnChild();
     }, err => {
-      gulp.watch('gulpfile(.babel|).js', spawnChild);
+      gulp.watch(['gulpfile.js', 'gulpfile.babel.js'], spawnChild);
       spawnChild();
     });
   };
