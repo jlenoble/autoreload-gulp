@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import gulp from 'gulp';
 import mocha from 'gulp-mocha';
 
