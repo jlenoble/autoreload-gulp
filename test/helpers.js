@@ -1,20 +1,20 @@
-import {expect} from 'chai';
-import del from 'del';
-import {spawn} from 'child_process';
-import childProcessData from 'child-process-data';
-import gulp from 'gulp';
-import replace from 'gulp-replace';
+import { expect } from "chai";
+import del from "del";
+import { spawn } from "child_process";
+import childProcessData from "child-process-data";
+import gulp from "gulp";
+import replace from "gulp-replace";
 
-export const hellos = ['Hello!', 'Hola!', 'Hallo!', 'Ciao!', 'Salut!', 'Ave!'];
+export const hellos = ["Hello!", "Hola!", "Hallo!", "Ciao!", "Salut!", "Ave!"];
 
-function repeat (action, interval = 200, maxDuration = 4000) {
+function repeat(action, interval = 200, maxDuration = 4000) {
   let intervalId;
   let timeoutId;
 
   return new Promise((resolve, reject) => {
-    function timeout () {
+    function timeout() {
       clearInterval(intervalId);
-      reject(new Error('Waiting too long for child process to finish'));
+      reject(new Error("Waiting too long for child process to finish"));
     }
 
     intervalId = setInterval(() => {
@@ -35,44 +35,45 @@ function repeat (action, interval = 200, maxDuration = 4000) {
   });
 }
 
-export function spawnGulpProcess (gulpfilePath) {
+export function spawnGulpProcess(gulpfilePath) {
   process.env.BABEL_DISABLE_CACHE = 1; // Don't use Babel caching for
   // these tests
 
-  return childProcessData(spawn('gulp', [
-    '--gulpfile',
-    gulpfilePath,
-  ], {detached: true})); // Make sure all test processes will be killed
+  return childProcessData(
+    spawn("gulp", ["--gulpfile", gulpfilePath], { detached: true })
+  ); // Make sure all test processes will be killed
 }
 
-export function updateGulpfile (gulpfilePath, dest) {
+export function updateGulpfile(gulpfilePath, dest) {
   return new Promise((resolve, reject) => {
-    gulp.src(gulpfilePath)
+    gulp
+      .src(gulpfilePath)
       .pipe(replace(hellos[4], hellos[5]))
       .pipe(replace(hellos[3], hellos[4]))
       .pipe(replace(hellos[2], hellos[3]))
       .pipe(replace(hellos[1], hellos[2]))
       .pipe(replace(hellos[0], hellos[1]))
-      .on('end', resolve)
-      .on('error', reject)
+      .on("end", resolve)
+      .on("error", reject)
       .pipe(gulp.dest(dest));
   });
 }
 
-export function cleanUp (data, ...paths) {
+export function cleanUp(data, ...paths) {
   process.kill(-data.childProcess.pid); // Kill last test process,
   // which was not killed by autoreload
 
   return Promise.all(paths.map(path => del(path)));
 }
 
-export function testData (data, change) {
-  let complete = data.outMessages.findIndex(
-    el => el.match(/Finished 'watch' after/)) !== -1;
+export function testData(data, change) {
+  let complete =
+    data.outMessages.findIndex(el => el.match(/Finished 'watch' after/)) !== -1;
 
   if (!complete) {
-    complete = data.errMessages.findIndex(
-      el => el.match(/'watch' errored after/)) !== -1;
+    complete =
+      data.errMessages.findIndex(el => el.match(/'watch' errored after/)) !==
+      -1;
   }
 
   if (complete) {
@@ -82,11 +83,17 @@ export function testData (data, change) {
   return complete;
 }
 
-export function itCallback (options) {
-  const {copySources, spawnGulpProcess, updateSources, cleanUp,
-    testData, changes} = options;
+export function itCallback(options) {
+  const {
+    copySources,
+    spawnGulpProcess,
+    updateSources,
+    cleanUp,
+    testData,
+    changes
+  } = options;
 
-  return async function () {
+  return async function() {
     this.timeout(18000); // eslint-disable-line no-invalid-this
 
     await copySources();
@@ -97,7 +104,7 @@ export function itCallback (options) {
       let counter = changes.length - 1;
       let change = changes[changes.length - 1 - counter];
 
-      while (await repeat(() => testData(data, change)) && counter > 0) {
+      while ((await repeat(() => testData(data, change))) && counter > 0) {
         counter--;
         change = changes[changes.length - 1 - counter];
         data.forget();

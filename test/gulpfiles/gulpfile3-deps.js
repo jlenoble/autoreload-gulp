@@ -1,6 +1,6 @@
-var gulp = require('gulp');
-var autoreload = require('./src/autoreload-gulp');
+const gulp = require("gulp");
+const autoreload = require("./src/autoreload-gulp");
 
-require('./gulp_tasks/tasks.js');
+require("./gulp_tasks/tasks.js");
 
-gulp.task('default', autoreload('watch'));
+gulp.task("default", autoreload("watch"));

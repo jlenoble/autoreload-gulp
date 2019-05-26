@@ -1,18 +1,24 @@
-import path from 'path';
-import fse from 'fs-extra';
-import {spawnGulpProcess, updateGulpfile, cleanUp, testData, itCallback, hellos}
-  from './helpers';
+import path from "path";
+import fse from "fs-extra";
+import {
+  spawnGulpProcess,
+  updateGulpfile,
+  cleanUp,
+  testData,
+  itCallback,
+  hellos
+} from "./helpers";
 
-function copyGulpfile (gulpfilePath) {
+function copyGulpfile(gulpfilePath) {
   const file = path.basename(gulpfilePath);
-  const srcFile = path.join('./test/gulpfiles', file);
+  const srcFile = path.join("./test/gulpfiles", file);
   return fse.copy(srcFile, gulpfilePath);
 }
 
-function makeItCallback (gulpfilePath) {
+function makeItCallback(gulpfilePath) {
   const copySources = () => copyGulpfile(gulpfilePath);
   const _spawnGulpProcess = () => spawnGulpProcess(gulpfilePath);
-  const updateSources = () => updateGulpfile(gulpfilePath, 'build');
+  const updateSources = () => updateGulpfile(gulpfilePath, "build");
   const _cleanUp = data => cleanUp(data, gulpfilePath);
 
   return itCallback({
@@ -21,12 +27,14 @@ function makeItCallback (gulpfilePath) {
     updateSources,
     cleanUp: _cleanUp,
     testData,
-    changes: hellos,
+    changes: hellos
   });
 }
 
-describe('Testing autoreload-gulp', function () {
-  it('Autoreloading gulpfile.js', makeItCallback('build/gulpfile.js'));
-  it('Autoreloading gulpfile.babel.js', makeItCallback(
-    'build/gulpfile.babel.js'));
+describe("Testing autoreload-gulp", () => {
+  it("Autoreloading gulpfile.js", makeItCallback("build/gulpfile.js"));
+  it(
+    "Autoreloading gulpfile.babel.js",
+    makeItCallback("build/gulpfile.babel.js")
+  );
 });

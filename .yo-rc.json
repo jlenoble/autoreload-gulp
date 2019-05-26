@@ -1,16 +1,32 @@
 {
   "generator-wupjs": {
-    "module": "autoreload-gulp",
-    "description": "Reloads gulp process when gulpfile.js or an imported relative dependency change",
-    "author": "Jason Lenoble",
-    "email": "jason.lenoble@gmail.com",
-    "github": "jlenoble",
-    "license": "MIT",
-    "transpile": "es2017",
-    "addons": [],
-    "Class": "AutoreloadGulp",
-    "updated": 2017,
-    "created": 2016,
-    "year": "2016-2017"
+    "createdWith": "0.1.0",
+    "modifiedWith": "0.6.0-5",
+    "createdOn": "2016-08-05T18:41:40.042Z",
+    "modifiedOn": "2019-05-26T12:55:42.760Z",
+    "gulp": true,
+    "srcDir": "src",
+    "testDir": "test",
+    "buildDir": "build",
+    "docDir": "docs",
+    "libDir": "lib",
+    "gulpDir": "gulp",
+    "typescript": true,
+    "jsx": false,
+    "extensions": [
+      "ts",
+      "js"
+    ],
+    "jupyter": false,
+    "antlr4": false,
+    "server": true,
+    "client": false,
+    "devModuleTypes": [
+      "ES6"
+    ],
+    "prodModuleTypes": [
+      "CommonJS"
+    ],
+    "monorepo": false
   }
 }

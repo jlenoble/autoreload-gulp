@@ -1,34 +1,36 @@
-import gulp from 'gulp';
-import {spawn} from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import psTree from 'ps-tree';
+import gulp from "gulp";
+import { spawn } from "child_process";
+import fs from "fs";
+import path from "path";
+import psTree from "ps-tree";
 
-var deepKill = function (pid, _signal, _callback) {
-  const signal = _signal || 'SIGKILL';
-  const callback = _callback || function () {};
+const deepKill = function(pid, _signal, _callback) {
+  const signal = _signal || "SIGKILL";
+  const callback = _callback || function() {};
 
-  psTree(pid, function (err, children) {
-    [pid].concat(
-      children.map(function (p) {
-        return p.PID;
-      })
-    ).forEach(function (tpid) {
-      try {
-        process.kill(tpid, signal);
-      } catch (ex) {}
-    });
+  psTree(pid, (err, children) => {
+    [pid]
+      .concat(
+        children.map(p => {
+          return p.PID;
+        })
+      )
+      .forEach(tpid => {
+        try {
+          process.kill(tpid, signal);
+        } catch (ex) {}
+      });
     callback();
   });
 };
 
 const autoreload = (task, gulpDir) => {
   return () => {
-    var p;
+    let p;
 
-    function checkGulpDir (dir) {
+    function checkGulpDir(dir) {
       return new Promise((resolve, reject) => {
-        fs.stat(dir, function (err, stats) {
+        fs.stat(dir, (err, stats) => {
           if (err) {
             return reject(err);
           }
@@ -41,36 +43,44 @@ const autoreload = (task, gulpDir) => {
       });
     }
 
-    function spawnChild (done) {
+    function spawnChild(done) {
       if (p) {
         deepKill(p.pid);
       }
-      p = spawn('gulp', [task], {stdio: 'inherit'});
+      p = spawn("gulp", [task], { stdio: "inherit" });
       if (done) {
         done();
       }
     }
 
-    function swapResolution (promise) { // (A\/B)° = A°/\B°
+    function swapResolution(promise) {
+      // (A\/B)° = A°/\B°
       return new Promise((resolve, reject) =>
-        Promise.resolve(promise).then(reject, resolve));
+        Promise.resolve(promise).then(reject, resolve)
+      );
     }
 
-    function any (promises) {
+    function any(promises) {
       return swapResolution(Promise.all(promises.map(swapResolution)));
-    };
+    }
 
-    const promise = gulpDir ? Promise.resolve(gulpDir) :
-      any(['gulp', 'gulp-tasks', 'gulp_tasks'].map(checkGulpDir));
+    const promise = gulpDir
+      ? Promise.resolve(gulpDir)
+      : any(["gulp", "gulp-tasks", "gulp_tasks"].map(checkGulpDir));
 
-    return promise.then(dir => {
-      gulp.watch(['gulpfile.js', 'gulpfile.babel.js', path.join(dir,
-        '**/*.js')], spawnChild);
-      spawnChild();
-    }, err => {
-      gulp.watch(['gulpfile.js', 'gulpfile.babel.js'], spawnChild);
-      spawnChild();
-    });
+    return promise.then(
+      dir => {
+        gulp.watch(
+          ["gulpfile.js", "gulpfile.babel.js", path.join(dir, "**/*.js")],
+          spawnChild
+        );
+        spawnChild();
+      },
+      err => {
+        gulp.watch(["gulpfile.js", "gulpfile.babel.js"], spawnChild);
+        spawnChild();
+      }
+    );
   };
 };
 
