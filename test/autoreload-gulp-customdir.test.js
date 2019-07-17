@@ -32,7 +32,7 @@ describe("Testing custom gulpDir", () => {
   it(
     `Testing gulpfile 'gulpfiles/customdir.js'`,
     testGulpProcess({
-      sources: ["src/**/*.js", "test/**/*.js"],
+      sources: ["src/**/*.ts", "test/**/*.js"],
       gulpfile: "test/gulpfiles/customdir.js",
       transpileGulp: true,
       transpileSources: true,
