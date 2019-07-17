@@ -1,12 +1,15 @@
 import testGulpProcess from "test-gulp-process";
 import gulp from "gulp";
 import path from "path";
+import touchMs from "touch-ms";
+import { delay } from "promise-plumber";
 import replace from "gulp-replace";
 import { hellos } from "./helpers";
 
-const update = options => {
-  return new Promise((resolve, reject) => {
-    const gulpPath = path.join(options.dest, "test/gulpfiles/gulp/tasks.js");
+const update = async options => {
+  const gulpPath = path.join(options.dest, "test/gulpfiles/gulp/tasks.js");
+
+  await new Promise((resolve, reject) => {
     return gulp
       .src(gulpPath, { base: options.dest })
       .pipe(replace(hellos[4], hellos[5]))
@@ -18,6 +21,11 @@ const update = options => {
       .on("error", reject)
       .pipe(gulp.dest(options.dest));
   });
+
+  // gulp.dest doesn't update mtime and chokidar throttles for 5ms, so touch
+  // file after 10ms
+  await delay(20);
+  await touchMs(gulpPath);
 };
 
 describe("Testing custom gulpDir", () => {
@@ -26,6 +34,10 @@ describe("Testing custom gulpDir", () => {
     testGulpProcess({
       sources: ["src/**/*.js", "test/**/*.js"],
       gulpfile: "test/gulpfiles/customdir.js",
+      transpileGulp: true,
+      transpileSources: true,
+      fullDebug: true,
+
       messages: [
         `Starting 'default'...`,
         `Finished 'default' after`,
