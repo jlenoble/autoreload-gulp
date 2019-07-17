@@ -1,5 +1,12 @@
 # autoreload-gulp
+
 Reloads gulp process when gulpfile.js or an imported relative dependency change
+
+  * [Goal](#goal)
+  * [Usage](#usage)
+  * [Importing tasks or helper functions](#importing-tasks-or-helper-functions)
+  * [License](#license)
+
 
 ## Goal
 
@@ -137,10 +144,11 @@ import './build/gulp-tasks/task2';
 import './build/gulp-tasks/task3';
 
 gulp.task('default', autoreload('watch', 'build/gulp-tasks'));
-```
+
 
 ## License
 
 autoreload-gulp is [MIT licensed](./LICENSE).
 
-© 2016-2017 [Jason Lenoble](mailto:jason.lenoble@gmail.com)
+© 2016-2019 [Jason Lenoble](mailto:jason.lenoble@gmail.com)
+
