@@ -37,13 +37,13 @@ async function any(promises: Promise<string>[]): Promise<string> {
   }
 }
 
-const autoreload = (task: string, gulpDir?: string): (() => void) => {
+const autoreload = (task: string, gulpDir?: string): (() => Promise<void>) => {
   return async (): Promise<void> => {
     let p: ChildProcess;
 
-    function spawnChild(done?: () => void): void {
+    async function spawnChild(done?: () => void): Promise<void> {
       if (p) {
-        deepKill(p.pid);
+        await deepKill(p.pid);
       }
       p = spawn("gulp", [task], { stdio: "inherit" });
       if (done) {
@@ -60,10 +60,10 @@ const autoreload = (task: string, gulpDir?: string): (() => void) => {
         ["gulpfile.js", "gulpfile.babel.js", path.join(dir, "**/*.js")],
         spawnChild
       );
-      spawnChild();
+      await spawnChild();
     } catch (e) {
       gulp.watch(["gulpfile.js", "gulpfile.babel.js"], spawnChild);
-      spawnChild();
+      await spawnChild();
     }
   };
 };
