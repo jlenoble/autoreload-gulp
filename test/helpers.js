@@ -4,6 +4,8 @@ import { spawn } from "child_process";
 import childProcessData from "child-process-data";
 import gulp from "gulp";
 import replace from "gulp-replace";
+import touchMs from "touch-ms";
+import { delay } from "promise-plumber";
 
 export const hellos = ["Hello!", "Hola!", "Hallo!", "Ciao!", "Salut!", "Ave!"];
 
@@ -44,8 +46,8 @@ export function spawnGulpProcess(gulpfilePath) {
   ); // Make sure all test processes will be killed
 }
 
-export function updateGulpfile(gulpfilePath, dest) {
-  return new Promise((resolve, reject) => {
+export async function updateGulpfile(gulpfilePath, dest) {
+  await new Promise((resolve, reject) => {
     gulp
       .src(gulpfilePath)
       .pipe(replace(hellos[4], hellos[5]))
@@ -53,10 +55,15 @@ export function updateGulpfile(gulpfilePath, dest) {
       .pipe(replace(hellos[2], hellos[3]))
       .pipe(replace(hellos[1], hellos[2]))
       .pipe(replace(hellos[0], hellos[1]))
+      .pipe(gulp.dest(dest))
       .on("end", resolve)
-      .on("error", reject)
-      .pipe(gulp.dest(dest));
+      .on("error", reject);
   });
+
+  // gulp.dest doesn't update mtime and chokidar throttles for 5ms, so touch
+  // file after 10ms
+  await delay(20);
+  await touchMs(gulpfilePath);
 }
 
 export function cleanUp(data, ...paths) {
@@ -68,11 +75,12 @@ export function cleanUp(data, ...paths) {
 
 export function testData(data, change) {
   let complete =
-    data.outMessages.findIndex(el => el.match(/Finished 'watch' after/)) !== -1;
+    data.outMessages().findIndex(el => el.match(/Finished 'watch' after/)) !==
+    -1;
 
   if (!complete) {
     complete =
-      data.errMessages.findIndex(el => el.match(/'watch' errored after/)) !==
+      data.errMessages().findIndex(el => el.match(/'watch' errored after/)) !==
       -1;
   }
 

@@ -1,10 +1,12 @@
 import fse from "fs-extra";
+import touchMs from "touch-ms";
+import { delay } from "promise-plumber";
 import { spawnGulpProcess, cleanUp, itCallback, testData } from "./helpers";
 
 let counter = 0;
 let n;
 
-function updateGulpfile(gulpfilePath) {
+async function updateGulpfile(gulpfilePath) {
   counter++;
   switch (counter) {
     case 1:
@@ -20,7 +22,13 @@ function updateGulpfile(gulpfilePath) {
       n = "";
       break;
   }
-  return fse.copy(`test/gulpfiles/simple-usage${n}.babel.js`, gulpfilePath);
+
+  await fse.copy(`test/gulpfiles/simple-usage${n}.babel.js`, gulpfilePath);
+
+  // gulp.dest doesn't update mtime and chokidar throttles for 5ms, so touch
+  // file after 10ms
+  await delay(20);
+  await touchMs(gulpfilePath);
 }
 
 function makeItCallback(gulpfilePath) {

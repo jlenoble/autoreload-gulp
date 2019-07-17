@@ -1,5 +1,7 @@
 import path from "path";
 import fse from "fs-extra";
+import touchMs from "touch-ms";
+import { delay } from "promise-plumber";
 import {
   spawnGulpProcess,
   updateGulpfile,
@@ -9,10 +11,16 @@ import {
   hellos
 } from "./helpers";
 
-function copyGulpfile(gulpfilePath) {
+async function copyGulpfile(gulpfilePath) {
   const file = path.basename(gulpfilePath);
   const srcFile = path.join("./test/gulpfiles", file);
-  return fse.copy(srcFile, gulpfilePath);
+
+  await fse.copy(srcFile, gulpfilePath);
+
+  // gulp.dest doesn't update mtime and chokidar throttles for 5ms, so touch
+  // file after 10ms
+  await delay(20);
+  await touchMs(gulpfilePath);
 }
 
 function makeItCallback(gulpfilePath) {
