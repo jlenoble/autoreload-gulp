@@ -32,7 +32,8 @@
     "node": ">=10.9.0"
   },
   "dependencies": {
-    "deepkill": "link:../deepkill"
+    "deepkill": "link:../deepkill",
+    "ps-tree": "^1.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.4",
@@ -77,6 +78,7 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-cached": "^1.1.1",
+    "gulp-cat": "^0.3.3",
     "gulp-debug": "^4.0.0",
     "gulp-eslint": "^6.0.0",
     "gulp-mocha": "^6.0.0",
@@ -92,8 +94,10 @@
     "plumb-gulp": "^0.2.2",
     "polypath": "^0.7.0",
     "prettier": "^1.18.2",
+    "promise-plumber": "link:../promise-plumber",
     "source-map-support": "^0.5.12",
     "test-gulp-process": "link:../test-gulp-process",
+    "touch-ms": "^0.1.1",
     "typescript": "^3.5.3"
   }
 }
