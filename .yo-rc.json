@@ -29,5 +29,16 @@
     ],
     "monorepo": false,
     "hasGulpfilesDir": false
+  },
+  "organon": {
+    "relocatedDevDeps": {
+      "test/gulpfiles": {
+        "./src": "./src",
+        "./gulp": "./test/gulpfiles/gulp",
+        "./gulp-tasks": "./test/gulpfiles/gulp",
+        "./gulp_tasks": "./test/gulpfiles/gulp",
+        "./test/gulpfiles/gulp": "./test/gulpfiles/gulp"
+      }
+    }
   }
 }
